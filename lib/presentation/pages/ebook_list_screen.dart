@@ -25,7 +25,10 @@ class EbookListScreen extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: TextField(
+            child: TextFormField(
+              onTapOutside: (event) {
+                FocusManager.instance.primaryFocus?.unfocus();
+              },
               onChanged: controller.onSearchChanged,
               decoration: InputDecoration(
                 hintText: 'Search by title, author or filename...',
@@ -41,17 +44,20 @@ class EbookListScreen extends StatelessWidget {
               if (controller.isLoading.value && controller.ebooks.isEmpty) {
                 return const Center(child: CircularProgressIndicator());
               }
-              
+
               if (controller.errorMessage.isNotEmpty) {
                 return Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(controller.errorMessage.value, style: const TextStyle(color: Colors.red)),
+                      Text(
+                        controller.errorMessage.value,
+                        style: const TextStyle(color: Colors.red),
+                      ),
                       ElevatedButton(
                         onPressed: () => controller.fetchEbooks(),
                         child: const Text('Retry'),
-                      )
+                      ),
                     ],
                   ),
                 );
@@ -66,31 +72,44 @@ class EbookListScreen extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final ebook = controller.ebooks[index];
                   return Card(
-                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     child: ListTile(
-                      leading: const Icon(Icons.picture_as_pdf, color: Colors.red, size: 40),
-                      title: Text(ebook.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      leading: const Icon(
+                        Icons.picture_as_pdf,
+                        color: Colors.red,
+                        size: 40,
+                      ),
+                      title: Text(
+                        ebook.title,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
                       subtitle: Text('${ebook.author}\n${ebook.filename}'),
                       isThreeLine: true,
                       onTap: () {
-                         Get.to(() => PdfViewerScreen(
-                           pdfUrl: ebook.pdfUrl,
-                           title: ebook.title,
-                         ));
+                        Get.to(
+                          () => PdfViewerScreen(
+                            pdfUrl: ebook.pdfUrl,
+                            title: ebook.title,
+                          ),
+                        );
                       },
                       trailing: IconButton(
                         icon: const Icon(Icons.delete, color: Colors.grey),
                         onPressed: () {
                           Get.defaultDialog(
                             title: 'Delete Ebook',
-                            middleText: 'Are you sure you want to delete "${ebook.title}"?',
+                            middleText:
+                                'Are you sure you want to delete "${ebook.title}"?',
                             textConfirm: 'Yes',
                             textCancel: 'No',
                             confirmTextColor: Colors.white,
                             onConfirm: () {
                               controller.deleteEbook(ebook.id);
                               Get.back();
-                            }
+                            },
                           );
                         },
                       ),
